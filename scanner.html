@@ -2,29 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Pantry Scanner</title>
+  <title>Pantry Scanner (Debug Mode)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
-<body style="background:#121212; color:white; text-align:center; font-family:sans-serif; padding: 1em;">
+<body style="background:#121212; color:white; font-family:sans-serif; padding: 1em; text-align:center;">
 
   <h1>📷 Pantry Barcode Scanner</h1>
-
   <video id="video" width="320" height="240" style="border:2px solid white; margin-bottom: 1em;"></video>
   <p id="result">Waiting for scan...</p>
 
-  <button onclick="goBack()" style="margin-top:1em; padding:0.7em 1.2em; background:#333; color:white; border:none; border-radius:8px; font-size:1em;">
+  <button onclick="goBack()" style="margin: 1em auto; padding:0.7em 1.2em; background:#333; color:white; border:none; border-radius:8px; font-size:1em;">
     🔙 Go Back
   </button>
+
+  <h2 style="margin-top:2em;">🛠️ Debug Log</h2>
+  <pre id="debug" style="background:#1e1e1e; color:#0f0; padding:1em; text-align:left; max-height:200px; overflow-y:auto; font-size:0.85em; border-radius:8px;"></pre>
 
   <script>
     const codeReader = new ZXing.BrowserMultiFormatReader();
     const video = document.getElementById('video');
     const result = document.getElementById('result');
+    const debug = document.getElementById('debug');
     const beep = new Audio('https://www.soundjay.com/button/beep-07.wav');
 
     const googleFormURL = 'https://docs.google.com/forms/d/e/1FAIpQLScismKp8h7QqM89kJco-V0QJJRO7mtkiIkDfIlZSYDeGk-k8g/formResponse';
     const barcodeField = 'entry.1303618809';
+
+    function log(msg) {
+      console.log(msg);
+      debug.textContent += msg + '\n';
+    }
 
     function goBack() {
       window.location.href = 'index.html';
@@ -33,10 +41,13 @@
     codeReader.decodeFromVideoDevice(null, video, (res, err) => {
       if (res) {
         beep.play();
-        result.textContent = `✅ Sent: ${res.text}`;
+        const scannedCode = res.text.trim();
+        result.textContent = `✅ Scanned: ${scannedCode}`;
+        log(`📦 Barcode scanned: ${scannedCode}`);
 
         const formData = new URLSearchParams();
-        formData.append(barcodeField, res.text);
+        formData.append(barcodeField, scannedCode);
+        log(`📝 Submitting form with: ${barcodeField}=${scannedCode}`);
 
         fetch(googleFormURL, {
           method: 'POST',
@@ -46,10 +57,17 @@
           },
           body: formData
         }).then(() => {
-          setTimeout(() => window.location.reload(), 1500);
+          log(`✅ Form submitted`);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }).catch(err => {
+          log(`❌ Fetch error: ${err.message}`);
         });
 
-        codeReader.reset(); // stop scanner after successful scan
+        codeReader.reset(); // stop scanner after scan
+      } else if (err && !(err instanceof ZXing.NotFoundException)) {
+        log(`⚠️ Scanner error: ${err}`);
       }
     });
   </script>
