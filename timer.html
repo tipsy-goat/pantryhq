@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Multi Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 1em;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+    }
+
+    .timer {
+      background: #1f1f1f;
+      border: 2px solid #444;
+      border-radius: 12px;
+      padding: 1em;
+      margin: 1em 0;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .inputs {
+      margin-bottom: 1em;
+    }
+
+    input {
+      padding: 0.5em;
+      font-size: 1.5em;
+      width: 80px;
+      text-align: center;
+      margin: 0.3em;
+      background: #222;
+      border: none;
+      color: white;
+      border-radius: 8px;
+    }
+
+    .display {
+      font-size: 2.5em;
+      margin-bottom: 0.6em;
+    }
+
+    .controls button {
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      margin: 0.3em;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      background: #333;
+      border: 1px solid #666;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #444;
+    }
+
+    .footer {
+      margin-top: auto;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⏲️ Multi Timer</h1>
+
+  <div id="timers-container">
+    <!-- Timers will be inserted here -->
+  </div>
+
+  <div class="footer">
+    <a href="index.html" style="color:#aaa;">⬅ Back to Dashboard</a>
+  </div>
+
+  <script>
+    const beep = new Audio('sounds/beep.wav');
+    const timers = [];
+
+    function createTimer(id) {
+      const timer = {
+        id,
+        totalSeconds: 0,
+        interval: null
+      };
+
+      const container = document.getElementById('timers-container');
+
+      const el = document.createElement('div');
+      el.className = 'timer';
+      el.innerHTML = `
+        <div class="inputs">
+          <input type="number" placeholder="Min" id="min${id}" min="0">
+          <input type="number" placeholder="Sec" id="sec${id}" min="0" max="59">
+        </div>
+        <div class="display" id="display${id}">00:00</div>
+        <div class="controls">
+          <button onclick="startTimer(${id})">▶️ Start</button>
+          <button onclick="stopTimer(${id})">⏹ Stop</button>
+        </div>
+      `;
+      container.appendChild(el);
+      timers.push(timer);
+    }
+
+    function startTimer(id) {
+      const timer = timers[id];
+      clearInterval(timer.interval);
+
+      const mins = parseInt(document.getElementById(`min${id}`).value) || 0;
+      const secs = parseInt(document.getElementById(`sec${id}`).value) || 0;
+      timer.totalSeconds = mins * 60 + secs;
+
+      if (timer.totalSeconds <= 0) return;
+
+      updateDisplay(id);
+
+      timer.interval = setInterval(() => {
+        timer.totalSeconds--;
+        updateDisplay(id);
+
+        if (timer.totalSeconds <= 0) {
+          clearInterval(timer.interval);
+          beep.play();
+        }
+      }, 1000);
+    }
+
+    function stopTimer(id) {
+      const timer = timers[id];
+      clearInterval(timer.interval);
+    }
+
+    function updateDisplay(id) {
+      const timer = timers[id];
+      const m = String(Math.floor(timer.totalSeconds / 60)).padStart(2, '0');
+      const s = String(timer.totalSeconds % 60).padStart(2, '0');
+      document.getElementById(`display${id}`).textContent = `${m}:${s}`;
+    }
+
+    // Create 3 timers
+    createTimer(0);
+    createTimer(1);
+    createTimer(2);
+  </script>
+
+</body>
+</html>
