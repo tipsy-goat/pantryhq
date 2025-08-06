@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Barcode Scanner</title>
+  <title>Scan to Google Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
 <body style="background:#121212; color:white; text-align:center; font-family:sans-serif;">
 
-  <h1>📷 Scan an Item</h1>
+  <h1>📷 Scan to Form</h1>
 
   <video id="video" width="320" height="240" style="border:1px solid white;"></video>
   <p id="result">Waiting for scan...</p>
-
   <button onclick="goBack()" style="margin-top:1em; padding:0.7em 1.2em; background:#333; color:white; border:none; border-radius:8px; font-size:1em;">
     🔙 Go Back
   </button>
@@ -23,37 +22,32 @@
     const result = document.getElementById('result');
     const beep = new Audio('https://www.soundjay.com/button/beep-07.wav');
 
+    const googleFormURL = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+    const barcodeField = 'entry.YOUR_ENTRY_ID'; // You'll get this below
+
     function goBack() {
       window.location.href = 'index.html';
     }
 
-    function startScan() {
-      codeReader.decodeFromVideoDevice(null, video, (res, err) => {
-        if (res) {
-          beep.play();
-          result.textContent = `✅ Scanned: ${res.text}`;
+    codeReader.decodeFromVideoDevice(null, video, (res, err) => {
+      if (res) {
+        beep.play();
+        result.textContent = `✅ Sent: ${res.text}`;
 
-          fetch('https://hook.eu2.make.com/4oryh28fov7u87c39rxo8d4xp6rwgc2d', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ barcode: res.text })
-          }).catch(err => {
-            console.error("Webhook send failed", err);
-            result.textContent += " (failed to send)";
-          });
+        const formData = new FormData();
+        formData.append(barcodeField, res.text);
 
-          // Stop scan after success
-          codeReader.reset();
-        }
-      }).catch(err => {
-        result.textContent = "⚠️ Camera error: " + err;
-        console.error(err);
-      });
-    }
-
-    startScan();
+        fetch(googleFormURL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: formData
+        }).then(() => {
+          setTimeout(() => window.location.reload(), 1500);
+        });
+        codeReader.reset(); // Stop camera
+      }
+    });
   </script>
 
 </body>
 </html>
-
