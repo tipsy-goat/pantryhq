@@ -7,28 +7,53 @@
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
 <body style="background:#121212; color:white; text-align:center; font-family:sans-serif;">
-  <h1>📷 Scan Item</h1>
-  <video id="video" width="300" height="200" style="border:1px solid white;"></video>
+
+  <h1>📷 Scan an Item</h1>
+
+  <video id="video" width="320" height="240" style="border:1px solid white;"></video>
   <p id="result">Waiting for scan...</p>
 
+  <button onclick="goBack()" style="margin-top:1em; padding:0.7em 1.2em; background:#333; color:white; border:none; border-radius:8px; font-size:1em;">
+    🔙 Go Back
+  </button>
+
   <script>
-    const codeReader = new ZXing.BrowserBarcodeReader();
+    const codeReader = new ZXing.BrowserMultiFormatReader();
     const video = document.getElementById('video');
     const result = document.getElementById('result');
     const beep = new Audio('https://www.soundjay.com/button/beep-07.wav');
 
-    codeReader.decodeFromVideoDevice(null, video, (res, err) => {
-      if (res) {
-        beep.play();
-        result.textContent = `Scanned: ${res.text}`;
-        // Send to Make/Integromat webhook:
-        fetch('https://hook.integromat.com/YOUR_WEBHOOK_URL', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ barcode: res.text })
-        }).catch(err => console.error("Send error", err));
-      }
-    });
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+
+    function startScan() {
+      codeReader.decodeFromVideoDevice(null, video, (res, err) => {
+        if (res) {
+          beep.play();
+          result.textContent = `✅ Scanned: ${res.text}`;
+
+          fetch('https://hook.integromat.com/YOUR_WEBHOOK_URL', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ barcode: res.text })
+          }).catch(err => {
+            console.error("Webhook send failed", err);
+            result.textContent += " (failed to send)";
+          });
+
+          // Stop scan after success
+          codeReader.reset();
+        }
+      }).catch(err => {
+        result.textContent = "⚠️ Camera error: " + err;
+        console.error(err);
+      });
+    }
+
+    startScan();
   </script>
+
 </body>
 </html>
+
