@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Multi Timer with Labels</title>
+  <title>Kitchen Timers</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -20,54 +20,53 @@
     h1 {
       font-size: 2em;
       text-align: center;
-      margin-bottom: 0.5em;
+      margin-bottom: 1em;
     }
 
     .timers {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: space-between;
       gap: 1em;
-      flex: 1;
-      justify-content: center;
+      flex-grow: 1;
     }
 
     .timer {
       background: #1f1f1f;
       border: 2px solid #444;
       border-radius: 12px;
-      padding: 1em 2em;
+      padding: 1em;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.5em;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 0;
     }
 
     .label-input {
-      font-size: 1.4em;
+      font-size: 1.3em;
       text-align: center;
       background: #222;
       color: white;
       border: none;
       border-radius: 6px;
-      padding: 0.3em 0.6em;
-    }
-
-    .content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1em;
+      padding: 0.4em 0.6em;
+      width: 90%;
+      margin-bottom: 0.5em;
     }
 
     .inputs {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 0.5em;
+      margin-bottom: 1em;
     }
 
     input[type="number"] {
       padding: 0.5em;
-      font-size: 1.4em;
-      width: 100px;
+      font-size: 1.2em;
+      width: 80px;
       background: #222;
       border: none;
       color: white;
@@ -76,14 +75,13 @@
     }
 
     .display {
-      font-size: 3em;
-      text-align: center;
-      flex-grow: 1;
+      font-size: 2.8em;
+      margin: 0.5em 0;
     }
 
     .controls {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 0.5em;
     }
 
@@ -114,6 +112,12 @@
       text-decoration: none;
       font-size: 0.95em;
     }
+
+    @media (max-width: 900px) {
+      .timers {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
@@ -143,16 +147,14 @@
       el.className = 'timer';
       el.innerHTML = `
         <input class="label-input" id="label${id}" placeholder="Timer ${id + 1}">
-        <div class="content">
-          <div class="inputs">
-            <input type="number" placeholder="Min" id="min${id}" min="0">
-            <input type="number" placeholder="Sec" id="sec${id}" min="0" max="59">
-          </div>
-          <div class="display" id="display${id}">00:00</div>
-          <div class="controls">
-            <button onclick="startTimer(${id})">▶️ Start</button>
-            <button onclick="stopTimer(${id})">⏹ Stop</button>
-          </div>
+        <div class="inputs">
+          <input type="number" placeholder="Min" id="min${id}" min="0">
+          <input type="number" placeholder="Sec" id="sec${id}" min="0" max="59">
+        </div>
+        <div class="display" id="display${id}">00:00</div>
+        <div class="controls">
+          <button onclick="startTimer(${id})">▶️</button>
+          <button onclick="stopTimer(${id})">⏹</button>
         </div>
       `;
       container.appendChild(el);
