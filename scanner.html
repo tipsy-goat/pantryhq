@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Barcode Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+</head>
+<body style="background:#121212; color:white; text-align:center; font-family:sans-serif;">
+  <h1>📷 Scan Item</h1>
+  <video id="video" width="300" height="200" style="border:1px solid white;"></video>
+  <p id="result">Waiting for scan...</p>
+
+  <script>
+    const codeReader = new ZXing.BrowserBarcodeReader();
+    const video = document.getElementById('video');
+    const result = document.getElementById('result');
+    const beep = new Audio('https://www.soundjay.com/button/beep-07.wav');
+
+    codeReader.decodeFromVideoDevice(null, video, (res, err) => {
+      if (res) {
+        beep.play();
+        result.textContent = `Scanned: ${res.text}`;
+        // Send to Make/Integromat webhook:
+        fetch('https://hook.integromat.com/YOUR_WEBHOOK_URL', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barcode: res.text })
+        }).catch(err => console.error("Send error", err));
+      }
+    });
+  </script>
+</body>
+</html>
