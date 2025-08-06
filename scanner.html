@@ -33,7 +33,7 @@
           beep.play();
           result.textContent = `✅ Scanned: ${res.text}`;
 
-          fetch('https://hook.integromat.com/YOUR_WEBHOOK_URL', {
+          fetch('https://hook.eu2.make.com/4oryh28fov7u87c39rxo8d4xp6rwgc2d', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ barcode: res.text })
