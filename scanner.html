@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Scan to Google Form</title>
+  <meta charset="UTF-8" />
+  <title>Pantry Scanner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 </head>
-<body style="background:#121212; color:white; text-align:center; font-family:sans-serif;">
+<body style="background:#121212; color:white; text-align:center; font-family:sans-serif; padding: 1em;">
 
-  <h1>📷 Scan to Form</h1>
+  <h1>📷 Pantry Barcode Scanner</h1>
 
-  <video id="video" width="320" height="240" style="border:1px solid white;"></video>
+  <video id="video" width="320" height="240" style="border:2px solid white; margin-bottom: 1em;"></video>
   <p id="result">Waiting for scan...</p>
+
   <button onclick="goBack()" style="margin-top:1em; padding:0.7em 1.2em; background:#333; color:white; border:none; border-radius:8px; font-size:1em;">
     🔙 Go Back
   </button>
@@ -23,7 +24,7 @@
     const beep = new Audio('https://www.soundjay.com/button/beep-07.wav');
 
     const googleFormURL = 'https://docs.google.com/forms/d/e/1FAIpQLScismKp8h7QqM89kJco-V0QJJRO7mtkiIkDfIlZSYDeGk-k8g/formResponse';
-    const barcodeField = 'entry.1303618809'; // You'll get this below
+    const barcodeField = 'entry.1303618809';
 
     function goBack() {
       window.location.href = 'index.html';
@@ -34,17 +35,21 @@
         beep.play();
         result.textContent = `✅ Sent: ${res.text}`;
 
-        const formData = new FormData();
+        const formData = new URLSearchParams();
         formData.append(barcodeField, res.text);
 
         fetch(googleFormURL, {
           method: 'POST',
           mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
           body: formData
         }).then(() => {
           setTimeout(() => window.location.reload(), 1500);
         });
-        codeReader.reset(); // Stop camera
+
+        codeReader.reset(); // stop scanner after successful scan
       }
     });
   </script>
